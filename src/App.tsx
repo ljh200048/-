@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import HomeView from './components/HomeView';
 import TodayFortuneView from './components/TodayFortuneView';
@@ -15,6 +15,10 @@ export default function App() {
   const [currentTab, setCurrentTab] = useState<string>('home');
   const [selectedProduct, setSelectedProduct] = useState<string>('');
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState<boolean>(false);
+
+  useEffect(() => {
+    document.title = '하루운세';
+  }, []);
 
   const handleSelectProduct = (productName: string) => {
     setSelectedProduct(productName);
