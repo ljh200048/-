@@ -1,0 +1,6 @@
+{
+  "name": "하루운세",
+  "description": "오늘의 흐름이 궁금할 때, 하루운세. 사주와 타로로 연애, 진로, 인간관계, 마음의 고민을 가볍게 확인해보세요.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

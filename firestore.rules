@@ -1,0 +1,117 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // 1. Global Catch-All Safety Net (Default Deny)
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // 2. Global Helper Primitives & Auth Helpers
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isEmailVerified() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // Checks if UID is verified admin (Admin collection or specific email checklist matching)
+    // To facilitate development in sandboxes, we also allow admin reads/writes via a simple custom admin verification
+    function isAdmin() {
+      return isSignedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    // 3. Validation Blueprint for Reservations (Anti-Update-Gap)
+    function isValidReservation(data) {
+      return data.keys().hasAll(['name', 'gender', 'birthdate', 'birthTime', 'birthPlace', 'topic', 'content', 'phone', 'email', 'agreed', 'paymentStatus', 'status', 'resultText', 'createdAt', 'updatedAt'])
+        && data.keys().size() == 14
+        && data.name is string && data.name.size() > 0 && data.name.size() <= 100
+        && (data.gender == '남성' || data.gender == '여성')
+        && data.birthdate is string && data.birthdate.size() == 10
+        && data.birthTime is string && data.birthTime.size() <= 50
+        && data.birthPlace is string && data.birthPlace.size() <= 100
+        && data.topic is string && data.topic.size() <= 100
+        && data.content is string && data.content.size() <= 5000
+        && data.phone is string && data.phone.size() <= 30
+        && data.email is string && data.email.size() <= 100
+        && data.agreed == true
+        && (data.paymentStatus == '미결제' || data.paymentStatus == '결제완료' || data.paymentStatus == '환불완료')
+        && (data.status == '접수완료' || data.status == '상담중' || data.status == '답변완료')
+        && data.resultText is string && data.resultText.size() <= 10000;
+    }
+
+    // 4. Validation Blueprint for Reviews
+    function isValidReview(data) {
+      return data.keys().hasAll(['name', 'rating', 'serviceName', 'content', 'answer', 'createdAt'])
+        && data.keys().size() == 6
+        && data.name is string && data.name.size() > 0 && data.name.size() <= 50
+        && data.rating is number && data.rating >= 1 && data.rating <= 5
+        && data.serviceName is string && data.serviceName.size() <= 100
+        && data.content is string && data.content.size() > 0 && data.content.size() <= 2000
+        && data.answer is string && data.answer.size() <= 5000;
+    }
+
+    // 5. Collection level rules
+    // Match Reservations
+    match /reservations/{reservationId} {
+      allow get: if (resource != null && (resource.data.email == request.auth.token.email || isAdmin()));
+      
+      // Allow creation by anyone (even anonymous or guest, since they pay and submit counseling info)
+      // They can also fill in guest records.
+      allow create: if isValidId(reservationId)
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.updatedAt == request.time
+        && request.resource.data.paymentStatus == '미결제'
+        && request.resource.data.status == '접수완료'
+        && request.resource.data.resultText == ''
+        && isValidReservation(request.resource.data);
+
+      // Only admins can alter reservation parameters or fill in consultation text
+      allow update: if (isAdmin() || (isSignedIn() && resource.data.email == request.auth.token.email))
+        && isValidReservation(request.resource.data)
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.updatedAt == request.time
+        && (isAdmin() || (
+            // Users cannot self-escalate payment or status or admin reply text!
+            request.resource.data.paymentStatus == resource.data.paymentStatus
+            && request.resource.data.status == resource.data.status
+            && request.resource.data.resultText == resource.data.resultText
+        ));
+
+      allow delete: if isAdmin();
+      
+      // Avoid raw list unless admin or querying self email
+      allow list: if isAdmin() || (isSignedIn() && resource.data.email == request.auth.token.email);
+    }
+
+    // Match Reviews
+    match /reviews/{reviewId} {
+      // Reviews can be read by anyone (public testimonials)
+      allow read: if true;
+
+      // Anyone can submit a review, but cannot pre-populate an answer fields
+      allow create: if isValidId(reviewId)
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.answer == ''
+        && isValidReview(request.resource.data);
+
+      // Only admins can update reviews (for putting admin replies / answer) or deleting review
+      allow update: if isAdmin()
+        && request.resource.data.createdAt == resource.data.createdAt
+        && isValidReview(request.resource.data);
+
+      allow delete: if isAdmin();
+    }
+
+    // Admin accounts (specifically for whitelisting authenticated admin IDs)
+    match /admins/{adminId} {
+      allow read: if isSignedIn();
+      allow write: if false; // Provisioned out-of-band or manually in Firebase console
+    }
+  }
+}

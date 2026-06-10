@@ -1,0 +1,120 @@
+{
+  "entities": {
+    "Reservation": {
+      "title": "Reservation",
+      "description": "운세 및 사주 상담 예약 테이블",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "신청자 이름 또는 닉네임"
+        },
+        "gender": {
+          "type": "string",
+          "enum": ["남성", "여성"],
+          "description": "성별"
+        },
+        "birthdate": {
+          "type": "string",
+          "description": "생년월일 (YYYY-MM-DD)"
+        },
+        "birthTime": {
+          "type": "string",
+          "description": "태어난 시간"
+        },
+        "birthPlace": {
+          "type": "string",
+          "description": "태어난 지역"
+        },
+        "topic": {
+          "type": "string",
+          "description": "상담 주제 (하루타로 - 상대방 마음, 하루궁합, 하루진로, 하루종합운)"
+        },
+        "content": {
+          "type": "string",
+          "description": "궁금한 내용"
+        },
+        "phone": {
+          "type": "string",
+          "description": "연락처"
+        },
+        "email": {
+          "type": "string",
+          "description": "이메일 주소"
+        },
+        "agreed": {
+          "type": "boolean",
+          "description": "개인정보 수집 동의 여부"
+        },
+        "paymentStatus": {
+          "type": "string",
+          "enum": ["미결제", "결제완료", "환불완료"],
+          "description": "결제 상태"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["접수완료", "상담중", "답변완료"],
+          "description": "상담 상태"
+        },
+        "resultText": {
+          "type": "string",
+          "description": "관리자가 입력하는 상담 결과 및 리딩 내용"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "신청 시간"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "최종 업데이트 시간"
+        }
+      },
+      "required": ["name", "gender", "birthdate", "phone", "email", "agreed", "topic"]
+    },
+    "Review": {
+      "title": "Review",
+      "description": "상담 및 서비스 이용 후기",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "작성자 닉네임"
+        },
+        "rating": {
+          "type": "number",
+          "description": "평점 (1-5)"
+        },
+        "serviceName": {
+          "type": "string",
+          "description": "상품명 (오늘의 하루타로, 하루궁합, 하루진로 등)"
+        },
+        "content": {
+          "type": "string",
+          "description": "리뷰 세부 내용"
+        },
+        "answer": {
+          "type": "string",
+          "description": "관리자 답글"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "작성 시간"
+        }
+      },
+      "required": ["name", "rating", "content", "serviceName"]
+    }
+  },
+  "firestore": {
+    "/reservations/{reservationId}": {
+      "schema": "Reservation",
+      "description": "상담 신청 데이터 컬렉션"
+    },
+    "/reviews/{reviewId}": {
+      "schema": "Review",
+      "description": "이용 후기 데이터 컬렉션"
+    }
+  }
+}
