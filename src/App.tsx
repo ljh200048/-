@@ -103,7 +103,6 @@ export default function App() {
               <button onClick={() => setCurrentTab('policies')} className="hover:text-amber-200 transition-colors">개인정보처리방침</button>
               <button onClick={() => setCurrentTab('policies')} className="hover:text-amber-200 transition-colors">환불정책</button>
               <button onClick={() => setCurrentTab('faq')} className="hover:text-amber-200 transition-colors">자주 묻는 질문</button>
-              <button onClick={() => setCurrentTab('admin')} className="hover:text-amber-200 transition-colors">관리실 입장</button>
             </div>
           </div>
 
