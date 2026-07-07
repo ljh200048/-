@@ -46,6 +46,12 @@ app.get("/api/health", (req, res) => {
   });
 });
 
+// ads.txt for Google AdSense verification
+app.get("/ads.txt", (req, res) => {
+  res.type("text/plain");
+  res.send("google.com, pub-8035431829602969, DIRECT, f08c47fec0942fa0");
+});
+
 // 2. Gemini-Powered / Poetic Tarot interpretive AI endpoint
 app.post("/api/fortune/tarot", async (req, res) => {
   const { cardName, category, question } = req.body;
