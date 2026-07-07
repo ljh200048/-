@@ -12,6 +12,21 @@ dotenv.config();
 const app = express();
 const PORT = 3000;
 
+// HTTPS Redirect Middleware (For secure connection SSL/TLS termination proxies like Cloud Run)
+app.use((req, res, next) => {
+  const host = req.headers.host || "";
+  if (
+    req.headers["x-forwarded-proto"] === "http" &&
+    !host.includes("localhost") &&
+    !host.includes("127.0.0.1") &&
+    !host.includes("ais-dev") &&
+    !host.includes("ais-pre")
+  ) {
+    return res.redirect(301, `https://${host}${req.url}`);
+  }
+  next();
+});
+
 app.use(express.json());
 
 // Initialize Gemini SDK securely using process.env.GEMINI_API_KEY
