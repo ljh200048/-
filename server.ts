@@ -55,7 +55,7 @@ app.get("/ads.txt", (req, res) => {
 // robots.txt for search engines
 app.get("/robots.txt", (req, res) => {
   res.type("text/plain");
-  res.send("User-agent: *\nAllow: /\nDisallow: /admin\n\nSitemap: https://ais-pre-63i7nm5mcnfzxbojptiful-554240967075.asia-northeast1.run.app/sitemap.xml");
+  res.send("User-agent: *\nAllow: /\nSitemap: https://todayluck.shop/sitemap.xml");
 });
 
 // sitemap.xml for search engines
@@ -64,7 +64,7 @@ app.get("/sitemap.xml", (req, res) => {
   res.send(`<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://ais-pre-63i7nm5mcnfzxbojptiful-554240967075.asia-northeast1.run.app/</loc>
+    <loc>https://todayluck.shop/</loc>
     <lastmod>2026-07-07</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>

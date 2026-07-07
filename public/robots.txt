@@ -1,5 +1,3 @@
 User-agent: *
 Allow: /
-Disallow: /admin
-
-Sitemap: https://ais-pre-63i7nm5mcnfzxbojptiful-554240967075.asia-northeast1.run.app/sitemap.xml
+Sitemap: https://todayluck.shop/sitemap.xml
