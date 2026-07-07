@@ -160,6 +160,64 @@ export default function HomeView({ onChangeTab, onSelectProduct }: HomeViewProps
         </div>
       </div>
 
+      {/* Premium Educational Guide for AdSense Compliance & SEO Richness */}
+      <div className="max-w-6xl mx-auto px-4 space-y-12" id="educational_guide_section">
+        <div className="text-center space-y-2">
+          <span className="text-xs font-semibold text-amber-300 tracking-wider inline-flex items-center gap-1">
+            <Sparkles className="w-3.5 h-3.5 text-amber-300 fill-amber-300/20" />
+            HARU UNSE INSIGHT
+          </span>
+          <h2 className="text-2xl font-bold text-slate-100 font-sans">하루운세 깊이 읽기: 명리와 타로가 건네는 위로</h2>
+          <p className="text-gray-400 text-xs max-w-lg mx-auto">
+            정해진 미래를 쫓기보다 내 안의 가능성을 일깨우는 동양의 명리학과 서양의 타로 인문학 가이드입니다.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8" id="educational_guide_grid">
+          {/* Card 1: Saju */}
+          <div className="rounded-2xl bg-[#090E24]/60 p-6 md:p-8 border border-purple-950 hover:border-purple-900/40 transition-all duration-300 space-y-4">
+            <div className="w-10 h-10 rounded-full bg-amber-950/40 border border-amber-500/30 flex items-center justify-center">
+              <Compass className="w-5 h-5 text-amber-300" />
+            </div>
+            <h3 className="text-base font-bold text-slate-100 border-b border-purple-950 pb-2">
+              사주명리학(四柱命理學): 타고난 기운의 균형
+            </h3>
+            <p className="text-xs text-gray-400 leading-relaxed space-y-2">
+              사주명리학은 동양 철학의 정수인 음양오행(陰陽五行)을 근간으로 삼습니다. 사람이 태어난 연(年), 월(月), 일(日), 시(時)의 네 기둥(四柱)과 여덟 글자(八字)는 각각 독특한 목(木), 화(火), 토(土), 금(金), 수(水)의 기운을 담고 있습니다. <br/><br/>
+              이는 단순한 길흉화복의 점술이 아니라, 나 자신이 어떤 씨앗으로 태어났는지를 분석하는 정밀한 자기 이해 시스템입니다. 내가 메마른 흙의 성정인지, 활활 타오르는 불의 성정인지를 이해함으로써 현재의 대운(大運)과 세운(歲運)을 더욱 지혜롭게 개척해 나갈 수 있습니다.
+            </p>
+          </div>
+
+          {/* Card 2: Tarot */}
+          <div className="rounded-2xl bg-[#090E24]/60 p-6 md:p-8 border border-purple-950 hover:border-purple-900/40 transition-all duration-300 space-y-4">
+            <div className="w-10 h-10 rounded-full bg-indigo-950/40 border border-indigo-500/30 flex items-center justify-center">
+              <Moon className="w-5 h-5 text-indigo-300" />
+            </div>
+            <h3 className="text-base font-bold text-slate-100 border-b border-purple-950 pb-2">
+              타로 카드(Tarot): 무의식과 심리의 투영
+            </h3>
+            <p className="text-xs text-gray-400 leading-relaxed space-y-2">
+              서양의 오랜 상징 체계인 타로 카드는 78장으로 구성되어 있으며, 각각의 그림은 인간 마음의 원형(Archetypes)을 담고 있습니다. 분석심리학의 거장 칼 융(Carl Jung)은 타로를 무의식이 의식화되는 ‘동시성(Synchronicity)의 도구’로 보았습니다. <br/><br/>
+              스스로 던진 질문에 대해 뽑힌 카드 한 장은 우연을 너머 내면 깊숙이 감추어 두었던 답과 감정을 거울처럼 비춰 줍니다. 특히 연애 속마음이나 진로 선택의 기로에서 뽑는 타로 카드는, 외부의 상황을 통제하기보다 내 마음속 진짜 기류를 깨닫고 스스로 현명한 매듭을 지을 수 있도록 이끌어 주는 다정한 등불이 됩니다.
+            </p>
+          </div>
+
+          {/* Card 3: Mindfulness */}
+          <div className="rounded-2xl bg-[#090E24]/60 p-6 md:p-8 border border-purple-950 hover:border-purple-900/40 transition-all duration-300 space-y-4">
+            <div className="w-10 h-10 rounded-full bg-purple-950/40 border border-purple-500/30 flex items-center justify-center">
+              <Sparkles className="w-5 h-5 text-purple-300" />
+            </div>
+            <h3 className="text-base font-bold text-slate-100 border-b border-purple-950 pb-2">
+              하루운세를 마주하는 현명한 지혜
+            </h3>
+            <p className="text-xs text-gray-400 leading-relaxed space-y-2">
+              하루운세의 철학은 ‘운명론적 체념’을 단호히 거부합니다. 미래는 고정된 화석이 아니라, 매 순간 마주하는 의사결정이 모여 흐르는 역동적인 강물과 같습니다. 운세를 확인한다는 것은 정해진 결말을 아는 것이 아니라, 다가올 비와 바람을 대비해 미리 튼튼한 우산을 준비해 두는 행위입니다. <br/><br/>
+              오늘 일진이 다소 무겁거나 카드가 차가운 조언을 주더라도 좌절할 필요가 없습니다. 오히려 ‘조심성을 기르는 하루’로 삼아 실수를 줄이고 기쁜 소식에는 한결 차분하게 감사하는 기회로 삼는 것, 그것이 바로 하루운세를 가장 우아하고 실질적으로 삶의 자산으로 삼는 길입니다.
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Simple emotional review snapshot banner */}
       <div className="bg-gradient-to-r from-purple-950/10 via-[#0A0F29] to-purple-950/10 border-y border-purple-900/20 py-10 px-4 text-center space-y-4">
         <p className="text-amber-200/90 text-sm font-serif italic max-w-2xl mx-auto leading-relaxed">
