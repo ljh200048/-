@@ -58,7 +58,7 @@ export default function HomeView({ onChangeTab, onSelectProduct }: HomeViewProps
             ✧ EMOTIONAL FORTUNE PLATFORM ✧
           </p>
           <h1 className="text-3xl md:text-5xl font-sans font-extrabold tracking-tight text-white leading-tight">
-            오늘의 흐름이 궁금할 때,<br/>
+            오늘의 운세가 궁금할 때,<br/>
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-100 to-purple-300">
               하루운세
             </span>
