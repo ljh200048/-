@@ -20,7 +20,6 @@ export default function Navbar({ currentTab, onChangeTab, isAdminLoggedIn, onLog
     { id: 'reviews', label: '후기', icon: HelpCircle },
     { id: 'faq', label: 'FAQ', icon: HelpCircle },
     { id: 'policies', label: '정책 안내', icon: Shield },
-    { id: 'admin', label: '관리자 페이지', icon: Key },
   ];
 
   return (
