@@ -1,6 +1,7 @@
 import express from "express";
 import path from "path";
 import dotenv from "dotenv";
+import nodemailer from "nodemailer";
 import { GoogleGenAI } from "@google/genai";
 import { createServer as createViteServer } from "vite";
 import { tarotCards, SajuFallbacks } from "./src/lib/fortuneData";
@@ -230,6 +231,112 @@ ${reading}
     res.json({
       reading: `${name} 님의 생일 사주 명리를 분석한 결과, 온화하고 품위 있는 기품이 올해 운세 흐름을 강건하게 에워싸고 있습니다. 고민하시는 ${topic} 관련한 일은 머지않아 슬기롭게 해결될 것입니다. 늘 다정한 마음의 쉼터 하루운세가 응원합니다.`,
       isAiPowered: false
+    });
+  }
+});
+
+// 4. Admin email notification endpoint
+app.post("/api/reservations/notify", async (req, res) => {
+  const { id, name, gender, birthdate, birthTime, birthPlace, topic, content, phone, email } = req.body;
+
+  const adminEmail = process.env.ADMIN_EMAIL || "lch200048@gmail.com";
+  const smtpHost = process.env.SMTP_HOST;
+  const smtpPort = process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT, 10) : 587;
+  const smtpUser = process.env.SMTP_USER;
+  const smtpPass = process.env.SMTP_PASS;
+  const smtpFrom = process.env.SMTP_FROM || smtpUser || "no-reply@todayluck.shop";
+
+  const emailSubject = `[오늘럭] 새로운 상담 신청 도착 (${name}님 / ${topic})`;
+  const emailHtml = `
+    <div style="font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #fafafa; color: #1e293b;">
+      <div style="text-align: center; border-bottom: 2px solid #6366f1; padding-bottom: 15px; margin-bottom: 20px;">
+        <h2 style="color: #4f46e5; margin: 0; font-size: 22px;">🔮 새로운 1:1 상담 예약 신청</h2>
+        <p style="font-size: 13px; color: #64748b; margin: 5px 0 0 0;">오늘럭(TodayLuck) 웹사이트를 통해 새로운 상담이 신청되었습니다.</p>
+      </div>
+      
+      <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+        <tr style="border-bottom: 1px solid #e2e8f0;">
+          <th style="text-align: left; padding: 10px; width: 30%; color: #475569; font-size: 14px;">예약 ID</th>
+          <td style="padding: 10px; font-weight: bold; color: #0f172a; font-size: 14px;">${id || '신규 접수'}</td>
+        </tr>
+        <tr style="border-bottom: 1px solid #e2e8f0;">
+          <th style="text-align: left; padding: 10px; color: #475569; font-size: 14px;">상담 상품</th>
+          <td style="padding: 10px; font-weight: bold; color: #4f46e5; font-size: 14px;">${topic}</td>
+        </tr>
+        <tr style="border-bottom: 1px solid #e2e8f0;">
+          <th style="text-align: left; padding: 10px; color: #475569; font-size: 14px;">신청자명</th>
+          <td style="padding: 10px; color: #0f172a; font-size: 14px;">${name} (${gender || '미지정'})</td>
+        </tr>
+        <tr style="border-bottom: 1px solid #e2e8f0;">
+          <th style="text-align: left; padding: 10px; color: #475569; font-size: 14px;">생년월일</th>
+          <td style="padding: 10px; color: #0f172a; font-size: 14px;">${birthdate} (${birthTime || '모름'})</td>
+        </tr>
+        <tr style="border-bottom: 1px solid #e2e8f0;">
+          <th style="text-align: left; padding: 10px; color: #475569; font-size: 14px;">출생지</th>
+          <td style="padding: 10px; color: #0f172a; font-size: 14px;">${birthPlace || '모름/미지정'}</td>
+        </tr>
+        <tr style="border-bottom: 1px solid #e2e8f0;">
+          <th style="text-align: left; padding: 10px; color: #475569; font-size: 14px;">연락처</th>
+          <td style="padding: 10px; color: #0f172a; font-size: 14px;">${phone}</td>
+        </tr>
+        <tr style="border-bottom: 1px solid #e2e8f0;">
+          <th style="text-align: left; padding: 10px; color: #475569; font-size: 14px;">이메일</th>
+          <td style="padding: 10px; color: #0f172a; font-size: 14px;"><a href="mailto:${email}" style="color: #3b82f6; text-decoration: none;">${email}</a></td>
+        </tr>
+      </table>
+
+      <div style="background-color: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 15px; margin-bottom: 20px;">
+        <h4 style="margin: 0 0 10px 0; color: #1e293b; font-size: 14px; border-bottom: 1px solid #f1f5f9; padding-bottom: 5px;">📝 고민 및 질문 내용</h4>
+        <p style="margin: 0; font-size: 13px; line-height: 1.6; color: #334155; white-space: pre-wrap;">${content}</p>
+      </div>
+
+      <div style="text-align: center; font-size: 11px; color: #94a3b8; margin-top: 30px; border-top: 1px solid #e2e8f0; padding-top: 15px;">
+        본 메일은 오늘럭(TodayLuck) 웹서비스 신청 즉시 발송되는 관리자 자동 알림 메일입니다.<br/>
+        관리자 페이지에서 답변을 작성하시거나 신청자 이메일(${email})로 직접 소통해 주세요.
+      </div>
+    </div>
+  `;
+
+  // Log to server console so developer always sees the backup reservation details
+  console.log(`[Notification Engine] New reservation received. ID: ${id || 'NEW'}. Topic: ${topic}. Name: ${name}. Email: ${email}`);
+
+  // Check if SMTP is configured
+  if (!smtpHost || !smtpUser || !smtpPass) {
+    console.warn(`[Notification Engine] SMTP server is not fully configured (SMTP_HOST, SMTP_USER, SMTP_PASS are missing).`);
+    console.info(`[Notification Engine] Simulated mail delivery successful to Admin (${adminEmail}). Reservation details printed above.`);
+    return res.json({
+      success: true,
+      simulated: true,
+      message: "SMTP is not configured in the Secrets panel, but the system simulated the delivery and saved details to server console logs."
+    });
+  }
+
+  try {
+    const transporter = nodemailer.createTransport({
+      host: smtpHost,
+      port: smtpPort,
+      secure: smtpPort === 465, // true for port 465, false for other ports (like 587)
+      auth: {
+        user: smtpUser,
+        pass: smtpPass,
+      },
+    });
+
+    await transporter.sendMail({
+      from: smtpFrom,
+      to: adminEmail,
+      subject: emailSubject,
+      html: emailHtml,
+    });
+
+    console.log(`[Notification Engine] Real email notification sent successfully to admin: ${adminEmail}`);
+    res.json({ success: true, simulated: false });
+  } catch (err: any) {
+    console.error(`[Notification Engine] Failed to send real email via SMTP:`, err);
+    res.status(500).json({
+      error: "Failed to send email via SMTP",
+      details: err.message,
+      simulatedFallback: true
     });
   }
 });

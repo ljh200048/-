@@ -71,6 +71,30 @@ export default function ReservationFormView({ selectedProduct, onSelectProduct }
     try {
       const docId = await dbService.addReservation(bookingData);
       if (docId) {
+        // Send email notification to admin via backend endpoint
+        try {
+          await fetch('/api/reservations/notify', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              id: docId,
+              name,
+              gender,
+              birthdate,
+              birthTime,
+              birthPlace: birthPlace || "미지정",
+              topic,
+              content,
+              phone,
+              email
+            }),
+          });
+        } catch (mailErr) {
+          console.error("Failed to notify admin via email:", mailErr);
+        }
+
         setSuccessMsg(`상담 신청서가 국화 향기처럼 안전하게 접수되었습니다!\n\n신청 대표 이메일: ${email}\n\n하단의 '예약 및 답변 확인' 코너에서 실시간으로 진행 전조와 풀이 결과를 확인해보실 수 있습니다.`);
         // Clean fields
         setName('');
