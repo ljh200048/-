@@ -5,18 +5,23 @@
       "description": "운세 및 사주 상담 예약 테이블",
       "type": "object",
       "properties": {
+        "category": {
+          "type": "string",
+          "enum": ["사주", "타로"],
+          "description": "상담 카테고리"
+        },
         "name": {
           "type": "string",
           "description": "신청자 이름 또는 닉네임"
         },
         "gender": {
           "type": "string",
-          "enum": ["남성", "여성"],
-          "description": "성별"
+          "enum": ["남성", "여성", ""],
+          "description": "성별 (사주일 때 필수)"
         },
         "birthdate": {
           "type": "string",
-          "description": "생년월일 (YYYY-MM-DD)"
+          "description": "생년월일 (YYYY-MM-DD) (사주일 때 필수)"
         },
         "birthTime": {
           "type": "string",
@@ -28,15 +33,15 @@
         },
         "topic": {
           "type": "string",
-          "description": "상담 주제 (하루타로 - 상대방 마음, 하루궁합, 하루진로, 하루종합운)"
+          "description": "상담 주제"
         },
         "content": {
           "type": "string",
-          "description": "궁금한 내용"
+          "description": "구민 및 상담 세부 내용"
         },
         "phone": {
           "type": "string",
-          "description": "연락처"
+          "description": "연락처 (필수)"
         },
         "email": {
           "type": "string",
@@ -71,7 +76,7 @@
           "description": "최종 업데이트 시간"
         }
       },
-      "required": ["name", "gender", "birthdate", "phone", "email", "agreed", "topic"]
+      "required": ["category", "name", "phone", "email", "agreed", "topic"]
     },
     "Review": {
       "title": "Review",

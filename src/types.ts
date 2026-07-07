@@ -1,10 +1,11 @@
 export interface Reservation {
   id?: string;
+  category?: '사주' | '타로';
   name: string;
-  gender: '남성' | '여성';
-  birthdate: string; // YYYY-MM-DD
-  birthTime: string; // HH:MM or "모름"
-  birthPlace: string;
+  gender?: '남성' | '여성' | '';
+  birthdate?: string; // YYYY-MM-DD
+  birthTime?: string; // HH:MM or "모름"
+  birthPlace?: string;
   topic: string; // Topic/Service name
   content: string; // Detailed question/concern
   phone: string;

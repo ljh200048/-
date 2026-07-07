@@ -10,6 +10,7 @@ interface ReservationFormViewProps {
 
 export default function ReservationFormView({ selectedProduct, onSelectProduct }: ReservationFormViewProps) {
   // Booking Form State
+  const [category, setCategory] = useState<'사주' | '타로'>('사주');
   const [name, setName] = useState('');
   const [gender, setGender] = useState<'남성' | '여성'>('남성');
   const [birthdate, setBirthdate] = useState('');
@@ -34,30 +35,63 @@ export default function ReservationFormView({ selectedProduct, onSelectProduct }
   useEffect(() => {
     if (selectedProduct) {
       setTopic(selectedProduct);
+      if (selectedProduct.includes('타로')) {
+        setCategory('타로');
+      } else {
+        setCategory('사주');
+      }
     }
   }, [selectedProduct]);
 
-  const topicsList = [
-    '하루타로 - 상대방 마음',
+  const sajuTopics = [
     '하루궁합',
     '하루진로',
-    '하루종합운'
+    '하루종합운',
+    '사주 종합 평생총운',
+    '사주 신년운세'
   ];
+
+  const tarotTopics = [
+    '하루타로 - 상대방 마음',
+    '연애운',
+    '금전운',
+    '직장운',
+    '건강운',
+    '기타 질문'
+  ];
+
+  const currentTopics = category === '사주' ? sajuTopics : tarotTopics;
 
   // Submit Reservation
   const handleSubmitBooking = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !birthdate || !phone || !email || !agreed || !topic) return;
+    if (!name || !phone || !email || !agreed || !topic) {
+      alert("필수 항목을 모두 입력해 주세요.");
+      return;
+    }
+
+    // Phone number format validation: allow spaces, hyphens, and check standard Korean formats
+    const phoneRegex = /^(01[016789])[-\s]?\d{3,4}[-\s]?\d{4}$/;
+    if (!phoneRegex.test(phone)) {
+      alert("올바른 휴대폰 번호 형식을 기입해 주세요. (예: 010-1234-5678)");
+      return;
+    }
+
+    if (category === '사주' && (!birthdate || !birthPlace)) {
+      alert("사주 상담 신청을 위해 생년월일과 태어난 지역을 모두 입력해 주세요.");
+      return;
+    }
 
     setIsSubmitting(true);
     setSuccessMsg(null);
 
     const bookingData: Omit<Reservation, 'id' | 'createdAt' | 'updatedAt'> = {
+      category,
       name,
-      gender,
-      birthdate,
-      birthTime,
-      birthPlace: birthPlace || "미지정",
+      gender: category === '사주' ? gender : '',
+      birthdate: category === '사주' ? birthdate : '',
+      birthTime: category === '사주' ? birthTime : '',
+      birthPlace: category === '사주' ? (birthPlace || "미지정") : '',
       topic,
       content,
       phone,
@@ -80,11 +114,12 @@ export default function ReservationFormView({ selectedProduct, onSelectProduct }
             },
             body: JSON.stringify({
               id: docId,
+              category,
               name,
-              gender,
-              birthdate,
-              birthTime,
-              birthPlace: birthPlace || "미지정",
+              gender: category === '사주' ? gender : '',
+              birthdate: category === '사주' ? birthdate : '',
+              birthTime: category === '사주' ? birthTime : '',
+              birthPlace: category === '사주' ? (birthPlace || "미지정") : '',
               topic,
               content,
               phone,
@@ -95,7 +130,7 @@ export default function ReservationFormView({ selectedProduct, onSelectProduct }
           console.error("Failed to notify admin via email:", mailErr);
         }
 
-        setSuccessMsg(`상담 신청서가 국화 향기처럼 안전하게 접수되었습니다!\n\n신청 대표 이메일: ${email}\n\n하단의 '예약 및 답변 확인' 코너에서 실시간으로 진행 전조와 풀이 결과를 확인해보실 수 있습니다.`);
+        setSuccessMsg(`상담 신청서가 정성스럽게 접수되었습니다!\n\n신청 대표 이메일: ${email}\n\n하단의 '예약 및 답변 확인' 코너에서 실시간으로 진행 상태와 풀이 결과를 확인해 보실 수 있습니다.`);
         // Clean fields
         setName('');
         setBirthdate('');
@@ -178,8 +213,43 @@ export default function ReservationFormView({ selectedProduct, onSelectProduct }
             </div>
           ) : (
             <form onSubmit={handleSubmitBooking} className="space-y-4 text-slate-100" id="intake_form">
+              {/* Category Selector Tab */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-gray-300">상담 카테고리 *</label>
+                <div className="grid grid-cols-2 gap-3 bg-[#030615] p-1.5 rounded-xl border border-purple-900/30">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCategory('사주');
+                      setTopic('');
+                    }}
+                    className={`py-2.5 rounded-lg text-xs font-bold tracking-wider transition-all flex items-center justify-center gap-1.5 ${
+                      category === '사주' 
+                        ? 'bg-gradient-to-r from-purple-900 to-indigo-900 border border-purple-700/40 text-amber-200 shadow-md' 
+                        : 'text-gray-400 hover:text-gray-200'
+                    }`}
+                  >
+                    ☯️ 명리 사주
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCategory('타로');
+                      setTopic('');
+                    }}
+                    className={`py-2.5 rounded-lg text-xs font-bold tracking-wider transition-all flex items-center justify-center gap-1.5 ${
+                      category === '타로' 
+                        ? 'bg-gradient-to-r from-purple-900 to-indigo-900 border border-purple-700/40 text-amber-200 shadow-md' 
+                        : 'text-gray-400 hover:text-gray-200'
+                    }`}
+                  >
+                    🔮 신비 타로
+                  </button>
+                </div>
+              </div>
+
               {/* Name & Gender */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className={category === '사주' ? "grid grid-cols-1 sm:grid-cols-2 gap-4" : "w-full"}>
                 <div className="space-y-1.5">
                   <label className="text-xs font-medium text-gray-300">이름 또는 닉네임 *</label>
                   <input
@@ -191,76 +261,81 @@ export default function ReservationFormView({ selectedProduct, onSelectProduct }
                     className="w-full px-3 py-2 rounded-xl bg-[#060A1D] border border-purple-900/40 text-sm focus:outline-none focus:border-amber-400/50 transition-colors"
                   />
                 </div>
-                <div className="space-y-1.5 col-span-1">
-                  <label className="text-xs font-medium text-gray-300">성별 *</label>
-                  <div className="grid grid-cols-2 gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setGender('남성')}
-                      className={`py-2 rounded-xl border text-xs font-semibold transition-all ${
-                        gender === '남성' ? 'border-amber-450 bg-amber-500/10 text-amber-300' : 'border-purple-950 bg-purple-950/20 text-gray-400'
-                      }`}
-                    >
-                      남성
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setGender('여성')}
-                      className={`py-2 rounded-xl border text-xs font-semibold transition-all ${
-                        gender === '여성' ? 'border-amber-450 bg-amber-500/10 text-amber-300' : 'border-purple-950 bg-purple-950/20 text-gray-400'
-                      }`}
-                    >
-                      여성
-                    </button>
+                {category === '사주' && (
+                  <div className="space-y-1.5 col-span-1">
+                    <label className="text-xs font-medium text-gray-300">성별 *</label>
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setGender('남성')}
+                        className={`py-2 rounded-xl border text-xs font-semibold transition-all ${
+                          gender === '남성' ? 'border-amber-450 bg-amber-500/10 text-amber-300' : 'border-purple-950 bg-purple-950/20 text-gray-400'
+                        }`}
+                      >
+                        남성
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setGender('여성')}
+                        className={`py-2 rounded-xl border text-xs font-semibold transition-all ${
+                          gender === '여성' ? 'border-amber-450 bg-amber-500/10 text-amber-300' : 'border-purple-950 bg-purple-950/20 text-gray-400'
+                        }`}
+                      >
+                        여성
+                      </button>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
 
-              {/* Birthdate & Birth Time */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-gray-300 flex items-center gap-1">
-                    <Calendar className="w-3.5 h-3.5 text-purple-400" />
-                    생년월일 (양력) *
-                  </label>
-                  <input
-                    type="date"
-                    required
-                    value={birthdate}
-                    onChange={(e) => setBirthdate(e.target.value)}
-                    className="w-full px-3 py-2.5 rounded-xl bg-[#060A1D] border border-purple-900/40 text-sm focus:outline-none focus:border-amber-400/50 transition-colors cursor-pointer text-slate-100"
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-gray-300 flex items-center gap-1">
-                    <Clock className="w-3.5 h-3.5 text-purple-400" />
-                    태어난 시각 *
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="예: 오후 3시 20분경, 혹은 모름"
-                    value={birthTime}
-                    onChange={(e) => setBirthTime(e.target.value)}
-                    className="w-full px-3 py-2.5 rounded-xl bg-[#060A1D] border border-purple-900/40 text-sm focus:outline-none focus:border-amber-400/50 transition-colors"
-                  />
-                </div>
-              </div>
+              {/* Birthdate & Birth Time & Birth Place (Only for Saju) */}
+              {category === '사주' && (
+                <>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-medium text-gray-300 flex items-center gap-1">
+                        <Calendar className="w-3.5 h-3.5 text-purple-400" />
+                        생년월일 (양력) *
+                      </label>
+                      <input
+                        type="date"
+                        required={category === '사주'}
+                        value={birthdate}
+                        onChange={(e) => setBirthdate(e.target.value)}
+                        className="w-full px-3 py-2.5 rounded-xl bg-[#060A1D] border border-purple-900/40 text-sm focus:outline-none focus:border-amber-400/50 transition-colors cursor-pointer text-slate-100"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-medium text-gray-300 flex items-center gap-1">
+                        <Clock className="w-3.5 h-3.5 text-purple-400" />
+                        태어난 시각 *
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="예: 오후 3시 20분경, 혹은 모름"
+                        value={birthTime}
+                        onChange={(e) => setBirthTime(e.target.value)}
+                        className="w-full px-3 py-2.5 rounded-xl bg-[#060A1D] border border-purple-900/40 text-sm focus:outline-none focus:border-amber-400/50 transition-colors"
+                      />
+                    </div>
+                  </div>
 
-              {/* Birth Place */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-medium text-gray-300 flex items-center gap-1">
-                  <MapPin className="w-3.5 h-3.5 text-purple-400" />
-                  태어난 지역 *
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="예: 경기도 용인시 수지구, 강원도 강릉 등 사주 시각 보정용"
-                  value={birthPlace}
-                  onChange={(e) => setBirthPlace(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl bg-[#060A1D] border border-purple-900/40 text-sm focus:outline-none focus:border-amber-400/50 transition-colors"
-                />
-              </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-medium text-gray-300 flex items-center gap-1">
+                      <MapPin className="w-3.5 h-3.5 text-purple-400" />
+                      태어난 지역 *
+                    </label>
+                    <input
+                      type="text"
+                      required={category === '사주'}
+                      placeholder="예: 경기도 용인시 수지구, 강원도 강릉 등 사주 시각 보정용"
+                      value={birthPlace}
+                      onChange={(e) => setBirthPlace(e.target.value)}
+                      className="w-full px-3 py-2 rounded-xl bg-[#060A1D] border border-purple-900/40 text-sm focus:outline-none focus:border-amber-400/50 transition-colors"
+                    />
+                  </div>
+                </>
+              )}
 
               {/* Topic Select */}
               <div className="space-y-1.5">
@@ -272,7 +347,7 @@ export default function ReservationFormView({ selectedProduct, onSelectProduct }
                   className="w-full px-3 py-2 rounded-xl bg-[#060A1D] border border-purple-900/40 text-sm focus:outline-none focus:border-amber-400/50 transition-colors text-slate-100"
                 >
                   <option value="">-- 상품 유형을 선택해 주세요 --</option>
-                  {topicsList.map((t) => (
+                  {currentTopics.map((t) => (
                     <option key={t} value={t}>{t}</option>
                   ))}
                 </select>
@@ -430,7 +505,7 @@ export default function ReservationFormView({ selectedProduct, onSelectProduct }
                         </span>
                       </div>
                       <div className="flex justify-between text-[10px] text-gray-500">
-                        <span>작성자: {res.name}</span>
+                        <span>작성자: {res.name} ({res.category || '사주'})</span>
                         <span>{new Date(res.createdAt).toLocaleDateString()}</span>
                       </div>
 

@@ -237,7 +237,7 @@ ${reading}
 
 // 4. Admin email notification endpoint
 app.post("/api/reservations/notify", async (req, res) => {
-  const { id, name, gender, birthdate, birthTime, birthPlace, topic, content, phone, email } = req.body;
+  const { id, category, name, gender, birthdate, birthTime, birthPlace, topic, content, phone, email } = req.body;
 
   const adminEmail = process.env.ADMIN_EMAIL || "lch200048@gmail.com";
   const smtpHost = process.env.SMTP_HOST;
@@ -246,11 +246,32 @@ app.post("/api/reservations/notify", async (req, res) => {
   const smtpPass = process.env.SMTP_PASS;
   const smtpFrom = process.env.SMTP_FROM || smtpUser || "no-reply@todayluck.shop";
 
-  const emailSubject = `[오늘럭] 새로운 상담 신청 도착 (${name}님 / ${topic})`;
+  const displayCategory = category || "사주";
+  const isSaju = displayCategory === "사주";
+
+  let sajuRowsHtml = "";
+  if (isSaju) {
+    sajuRowsHtml = `
+      <tr style="border-bottom: 1px solid #e2e8f0;">
+        <th style="text-align: left; padding: 10px; color: #475569; font-size: 14px;">성별</th>
+        <td style="padding: 10px; color: #0f172a; font-size: 14px;">${gender || '미지정'}</td>
+      </tr>
+      <tr style="border-bottom: 1px solid #e2e8f0;">
+        <th style="text-align: left; padding: 10px; color: #475569; font-size: 14px;">생년월일</th>
+        <td style="padding: 10px; color: #0f172a; font-size: 14px;">${birthdate} (${birthTime || '모름'})</td>
+      </tr>
+      <tr style="border-bottom: 1px solid #e2e8f0;">
+        <th style="text-align: left; padding: 10px; color: #475569; font-size: 14px;">출생지</th>
+        <td style="padding: 10px; color: #0f172a; font-size: 14px;">${birthPlace || '모름/미지정'}</td>
+      </tr>
+    `;
+  }
+
+  const emailSubject = `[오늘럭] 새로운 ${displayCategory} 상담 신청 도착 (${name}님 / ${topic})`;
   const emailHtml = `
     <div style="font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #fafafa; color: #1e293b;">
       <div style="text-align: center; border-bottom: 2px solid #6366f1; padding-bottom: 15px; margin-bottom: 20px;">
-        <h2 style="color: #4f46e5; margin: 0; font-size: 22px;">🔮 새로운 1:1 상담 예약 신청</h2>
+        <h2 style="color: #4f46e5; margin: 0; font-size: 22px;">🔮 새로운 1:1 ${displayCategory} 상담 예약 신청</h2>
         <p style="font-size: 13px; color: #64748b; margin: 5px 0 0 0;">오늘럭(TodayLuck) 웹사이트를 통해 새로운 상담이 신청되었습니다.</p>
       </div>
       
@@ -260,21 +281,18 @@ app.post("/api/reservations/notify", async (req, res) => {
           <td style="padding: 10px; font-weight: bold; color: #0f172a; font-size: 14px;">${id || '신규 접수'}</td>
         </tr>
         <tr style="border-bottom: 1px solid #e2e8f0;">
+          <th style="text-align: left; padding: 10px; color: #475569; font-size: 14px;">상담 구분</th>
+          <td style="padding: 10px; font-weight: bold; color: #4f46e5; font-size: 14px;">${displayCategory}</td>
+        </tr>
+        <tr style="border-bottom: 1px solid #e2e8f0;">
           <th style="text-align: left; padding: 10px; color: #475569; font-size: 14px;">상담 상품</th>
           <td style="padding: 10px; font-weight: bold; color: #4f46e5; font-size: 14px;">${topic}</td>
         </tr>
         <tr style="border-bottom: 1px solid #e2e8f0;">
           <th style="text-align: left; padding: 10px; color: #475569; font-size: 14px;">신청자명</th>
-          <td style="padding: 10px; color: #0f172a; font-size: 14px;">${name} (${gender || '미지정'})</td>
+          <td style="padding: 10px; color: #0f172a; font-size: 14px;">${name}</td>
         </tr>
-        <tr style="border-bottom: 1px solid #e2e8f0;">
-          <th style="text-align: left; padding: 10px; color: #475569; font-size: 14px;">생년월일</th>
-          <td style="padding: 10px; color: #0f172a; font-size: 14px;">${birthdate} (${birthTime || '모름'})</td>
-        </tr>
-        <tr style="border-bottom: 1px solid #e2e8f0;">
-          <th style="text-align: left; padding: 10px; color: #475569; font-size: 14px;">출생지</th>
-          <td style="padding: 10px; color: #0f172a; font-size: 14px;">${birthPlace || '모름/미지정'}</td>
-        </tr>
+        ${sajuRowsHtml}
         <tr style="border-bottom: 1px solid #e2e8f0;">
           <th style="text-align: left; padding: 10px; color: #475569; font-size: 14px;">연락처</th>
           <td style="padding: 10px; color: #0f172a; font-size: 14px;">${phone}</td>
@@ -298,7 +316,7 @@ app.post("/api/reservations/notify", async (req, res) => {
   `;
 
   // Log to server console so developer always sees the backup reservation details
-  console.log(`[Notification Engine] New reservation received. ID: ${id || 'NEW'}. Topic: ${topic}. Name: ${name}. Email: ${email}`);
+  console.log(`[Notification Engine] New reservation received. ID: ${id || 'NEW'}. Category: ${displayCategory}. Topic: ${topic}. Name: ${name}. Email: ${email}`);
 
   // Check if SMTP is configured
   if (!smtpHost || !smtpUser || !smtpPass) {

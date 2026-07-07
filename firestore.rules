@@ -28,11 +28,12 @@ service cloud.firestore {
 
     // 3. Validation Blueprint for Reservations (Anti-Update-Gap)
     function isValidReservation(data) {
-      return data.keys().hasAll(['name', 'gender', 'birthdate', 'birthTime', 'birthPlace', 'topic', 'content', 'phone', 'email', 'agreed', 'paymentStatus', 'status', 'resultText', 'createdAt', 'updatedAt'])
-        && data.keys().size() == 14
+      return data.keys().hasAll(['category', 'name', 'gender', 'birthdate', 'birthTime', 'birthPlace', 'topic', 'content', 'phone', 'email', 'agreed', 'paymentStatus', 'status', 'resultText', 'createdAt', 'updatedAt'])
+        && data.keys().size() == 15
+        && (data.category == '사주' || data.category == '타로')
         && data.name is string && data.name.size() > 0 && data.name.size() <= 100
-        && (data.gender == '남성' || data.gender == '여성')
-        && data.birthdate is string && data.birthdate.size() == 10
+        && (data.gender == '남성' || data.gender == '여성' || (data.category == '타로' && data.gender == ''))
+        && data.birthdate is string && (data.birthdate.size() == 10 || (data.category == '타로' && data.birthdate == ''))
         && data.birthTime is string && data.birthTime.size() <= 50
         && data.birthPlace is string && data.birthPlace.size() <= 100
         && data.topic is string && data.topic.size() <= 100

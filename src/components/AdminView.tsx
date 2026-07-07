@@ -190,7 +190,9 @@ export default function AdminView({ isAdminLoggedIn, onLoginAdmin }: AdminViewPr
                 {/* Meta details */}
                 <div className="flex flex-wrap items-center justify-between gap-3 border-b border-purple-950 pb-3">
                   <div className="flex items-center space-x-2.5">
-                    <span className="font-bold text-slate-100 text-sm">{res.name} ({res.gender})</span>
+                    <span className="font-bold text-slate-100 text-sm">
+                      [{res.category || '사주'}] {res.name} {res.gender ? `(${res.gender})` : ''}
+                    </span>
                     <span className="text-[10px] text-gray-500">|</span>
                     <span className="text-xs font-semibold text-amber-300 bg-amber-500/5 px-2.5 py-0.5 rounded border border-amber-500/10">
                       {res.topic}
@@ -229,14 +231,22 @@ export default function AdminView({ isAdminLoggedIn, onLoginAdmin }: AdminViewPr
 
                 {/* Grid info detail description */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs text-gray-400">
-                  <div className="flex items-center gap-1.5">
-                    <Calendar className="w-3.5 h-3.5 text-purple-400 shrink-0" />
-                    <span>생일: {res.birthdate} ({res.birthTime})</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <MapPin className="w-3.5 h-3.5 text-purple-400 shrink-0" />
-                    <span>출생지: {res.birthPlace}</span>
-                  </div>
+                  {(!res.category || res.category === '사주') ? (
+                    <>
+                      <div className="flex items-center gap-1.5">
+                        <Calendar className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+                        <span>생일: {res.birthdate} ({res.birthTime})</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <MapPin className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+                        <span>출생지: {res.birthPlace}</span>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="sm:col-span-2 flex items-center gap-1.5 text-purple-300 font-semibold text-xs">
+                      <span>🔮 타로 상담 (사주 상세 생략됨)</span>
+                    </div>
+                  )}
                   <div className="flex items-center gap-1.5">
                     <Phone className="w-3.5 h-3.5 text-purple-400 shrink-0" />
                     <span>연락처: {res.phone} / {res.email}</span>
